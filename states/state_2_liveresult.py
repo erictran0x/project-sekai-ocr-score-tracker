@@ -39,7 +39,7 @@ class LiveResult(State):
 
         # Obtain judgement data
         result_img = utils.screenshot(*profile['LIVE_RESULT']).convert('L')
-        result_img = ImageOps.invert(result_img).point(lambda p: p > 70 and 255)
+        result_img = ImageOps.invert(result_img).point(lambda p: p > 77 and 255)
         ocr_result = utils.tess_en.get(result_img)
         ocr_result = () if len(ocr_result) == 0 else list(filter(None, ocr_result.split('\n')))
         if len(ocr_result) != 5:
