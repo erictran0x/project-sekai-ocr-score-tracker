@@ -17,8 +17,6 @@ class InGame(State):
         super().__init__(1)
         self._samedata = 0
         self._result = None
-        self._title = None
-        self._diff = None
 
     def update(self, storage):
         # Obtain title and diff names for the first time
