@@ -21,7 +21,9 @@ and [here](https://developers.google.com/workspace/guides/create-credentials#des
 To create a profile for your device, refer to the provided profile at `profiles/pixel3a_1280_624.txt`.
 Note that dimensions for jacket images must be exact, but such for everything else can have some margin of error.
 
-Execute `python main.py profile_name window_name [google_sheets_id] [--stream]` to run the program.
+Execute `pip install -r requirements.txt` to install the dependencies.
+
+Execute `python main.py profile_name window_name [google_sheets_id] [--stream]` to run the main program.
 - `profile_name` is the file name of the profile, minus the `profiles` directory and `.txt` file format.
 - `window_name` is the name of the window used to capture your device.
 - `google_sheets_id` is the id of the Google spreadsheet of the stored data.
