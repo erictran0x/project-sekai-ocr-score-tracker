@@ -18,14 +18,15 @@ class LiveResult(State):
 
     def update(self, storage):
         # Check if in individual result screen
-        score_img = utils.screenshot(offset=(122, 106), size=(210, 49)).convert('L')
+        from global_ import profile
+        score_img = utils.screenshot(*profile['SCORE_LBL']).convert('L')
         score_img = ImageOps.invert(score_img).point(lambda p: p > 50 and 255)
         ocr_result = utils.tess_en.get(score_img).lower()
         if ocr_result != LiveResult.SCORE:
             return False, storage, False
 
         # Check if auto is enabled
-        auto_img = utils.screenshot(offset=(390, 120), size=(125, 28)).convert('L')
+        auto_img = utils.screenshot(*profile['AUTO_LBL']).convert('L')
         auto_img = ImageOps.invert(auto_img).point(lambda p: p > 55 and 255)
         ocr_result = utils.tess_en.get(auto_img).lower()
         if ocr_result == LiveResult.AUTO:
@@ -37,7 +38,7 @@ class LiveResult(State):
             return False, storage, False
 
         # Obtain judgement data
-        result_img = utils.screenshot(offset=(655, 373), size=(69, 149)).convert('L')
+        result_img = utils.screenshot(*profile['LIVE_RESULT']).convert('L')
         result_img = ImageOps.invert(result_img).point(lambda p: p > 70 and 255)
         ocr_result = utils.tess_en.get(result_img)
         ocr_result = () if len(ocr_result) == 0 else list(filter(None, ocr_result.split('\n')))

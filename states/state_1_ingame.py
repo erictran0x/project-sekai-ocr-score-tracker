@@ -22,16 +22,17 @@ class InGame(State):
 
     def update(self, storage):
         # Obtain title and diff names for the first time
+        from global_ import profile
         if self._samedata < 5:
             metadata_img = utils.screenshot()
+            o, s = profile['TITLE']
             title_img = ImageOps.invert(metadata_img.convert('L')) \
-                .crop((0, 450, 1280, 505)) \
+                .crop((o[0], o[1], o[0] + s[0], o[1] + s[1])) \
                 .point(lambda p: p > 140 and 255)
 
             # Get diff from pixel color and title from ocr
-            diff_name = self.get_best_diff(*metadata_img.getpixel((805, 382)))
+            diff_name = self.get_best_diff(*metadata_img.getpixel(profile['DIFF_PXL']))
             ocr_result = utils.tess_jp.get(title_img)
-            print(ocr_result, diff_name)
 
             if len(ocr_result) == 0 or diff_name is None:
                 return False, storage, False
@@ -58,14 +59,14 @@ class InGame(State):
 
         # If jacket found at top left, then result screen
         jacket_img_exp = storage['jacket_img']
-        jacket_img_act = utils.screenshot(offset=(98, 11), size=(70, 70))
+        jacket_img_act = utils.screenshot(*profile['JACKET_RES'])
         if utils.diff_ratio(jacket_img_exp, jacket_img_act) <= 0.085:
             self.__init__()
             self.log('Entered result screen.')
             return True, storage, True
 
         # If live type found, then no longer in game
-        live_type_img = utils.screenshot(offset=(113, 13), size=(230, 36)).convert('L')
+        live_type_img = utils.screenshot(*profile['LIVE_TYPE']).convert('L')
         live_type_img = live_type_img.point(lambda p: p > 90 and 255)
         ocr_result = utils.tess_jp.get(live_type_img).lower()
         if ocr_result == InGame.SOLO or ocr_result == InGame.MULTI:

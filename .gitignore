@@ -5,6 +5,7 @@ venv
 _*.py
 cache.pk1
 credentials.json
+token.json
 now_playing.txt
 personal_best.txt
 *.png

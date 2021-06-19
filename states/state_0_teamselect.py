@@ -24,14 +24,15 @@ class TeamSelect(State):
             from main import output_np_info
             output_np_info('np: Looking for a song to play...', '')
             self._reset_np = False
+        from global_ import profile
         # Get live type: solo or multi?, brighten as needed
-        live_type_img = utils.screenshot(offset=(113, 13), size=(230, 36)).convert('L')
+        live_type_img = utils.screenshot(*profile['LIVE_TYPE']).convert('L')
         lt_bright = ImageStat.Stat(live_type_img).rms[0]
         live_type_img = ImageEnhance.Brightness(live_type_img).enhance(100 / (lt_bright if lt_bright > 0 else 1))
         live_type_img = live_type_img.point(lambda p: p > 75 and 255)
 
         # Get bottom text on top left, brighten as needed
-        bt_img = utils.screenshot(offset=(133, 53), size=(230, 22)).convert('L')
+        bt_img = utils.screenshot(*profile['LIVE_BT']).convert('L')
         bt_rms = ImageStat.Stat(bt_img).rms[0]
         bt_img = ImageEnhance.Brightness(bt_img).enhance(100 / (bt_rms if bt_rms > 0 else 1))
         bt_img = ImageOps.invert(bt_img)
@@ -56,7 +57,8 @@ class TeamSelect(State):
         self._samescreen = 0
         if self._jacket_img is not None:
             # Look for jacket somewhere on the center, then compare it with the "smaller" one that we got initially
-            large_jacket_img = utils.screenshot(offset=(478, 78), size=(325, 325)).resize((70, 70))
+            # Assume w,h in SM_JACKET_SOLO and SM_JACKET_MULTI are equal
+            large_jacket_img = utils.screenshot(*profile['LG_JACKET']).resize(profile['SM_JACKET_SOLO'][1])
             storage['jacket_img'] = self._jacket_img
             similar = utils.diff_ratio(self._jacket_img, large_jacket_img) <= 0.085
             if similar:
@@ -65,12 +67,12 @@ class TeamSelect(State):
         elif self._samejacket < 3:
             # Get jacket from bottom left (position based on live type)
             if live_type == TeamSelect.SOLO:
-                jacket_pos = (30, 525)
+                dims = profile['SM_JACKET_SOLO']
             elif live_type == TeamSelect.MULTI:
-                jacket_pos = (31, 422)
+                dims = profile['SM_JACKET_MULTI']
             else:
                 return False, storage, False
-            jacket_img = utils.screenshot(offset=jacket_pos, size=(70, 70))
+            jacket_img = utils.screenshot(*dims)
             if self._jacket_img_tmp is None:
                 self._samejacket = 0
                 self._jacket_img_tmp = jacket_img

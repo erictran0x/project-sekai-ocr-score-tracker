@@ -1,0 +1,39 @@
+# Rectangles are denoted with x,y,w,h
+# Pixels are denoted with x,y
+
+# State 0 - team select
+
+# live type text (solo live/multi live)
+LIVE_TYPE=113,13,230,36
+
+# the text below the live type text
+LIVE_BT=133,53,230,22
+
+# large jacket img shown in-game, above song title and vocalists
+LG_JACKET=478,78,325,325
+
+# small jacket img shown in team select
+SM_JACKET_SOLO=30,525,70,70
+SM_JACKET_MULTI=31,422,70,70
+
+# State 1 - in-game
+
+# song title
+TITLE=0,450,1280,55
+
+# border around jacket to determine difficulty
+DIFF_PXL=805,382
+
+# jacket img in result screen
+JACKET_RES=98,11,70,70
+
+# State 2 - live result
+
+# score text in result screen
+SCORE_LBL=122,106,210,49
+
+# auto live text in result screen, only shown if auto enabled
+AUTO_LBL=390,120,125,28
+
+# live result (perfect, great, good, bad, miss)
+LIVE_RESULT=655,373,69,149
