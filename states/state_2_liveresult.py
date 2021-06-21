@@ -38,15 +38,16 @@ class LiveResult(State):
             return False, storage, False
 
         # Obtain judgement data
+        # TODO: a better job at making this work consistently
         result_img = utils.screenshot(*profile['LIVE_RESULT']).convert('L')
         res_bright = ImageStat.Stat(result_img).rms[0]
         result_img = ImageEnhance.Brightness(result_img).enhance(100 / (res_bright if res_bright > 0 else 1))
-        result_img = ImageOps.invert(result_img).point(lambda p: p > 100 and 255)
+        result_img = ImageOps.invert(result_img).point(lambda p: p > 103 and 255)
         ocr_result = utils.tess_en.get(result_img)
         ocr_result = () if len(ocr_result) == 0 else list(filter(None, ocr_result.split('\n')))
         if len(ocr_result) != 5:
             return False, storage, False
-        ocr_result_int = tuple(map(lambda s: int(s) if s.isnumeric() else -99999, ocr_result))
+        ocr_result_int = list(map(lambda s: int(s) if s.isnumeric() else -99999, ocr_result))
 
         # Non-positive = data hasn't shown up yet or not read correctly
         if sum(ocr_result_int) <= 0:
