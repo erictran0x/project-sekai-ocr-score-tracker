@@ -40,47 +40,50 @@ class TeamSelect(State):
 
         live_type, bt = utils.tess_en.get(live_type_img).lower(), utils.tess_jp.get(bt_img)
 
-        # Song select menu check
-        if live_type in LIVE_TYPES and bt != LIVE_TYPES[live_type]:
-            if self._jacket_img is not None:
-                self._samescreen += 1
-                if self._samescreen == 10:
-                    self.log(f'Resetting jacket image in {live_type}')
-                    self._samescreen = 0
-                    self._samejacket = 0
-                    self._jacket_img = None
-                    self._jacket_img_tmp = None
-            return False, storage, False
-
-        self._samescreen = 0
-        if self._jacket_img is not None:
-            # Look for jacket somewhere on the center, then compare it with the "smaller" one that we got initially
-            # Assume w,h in SM_JACKET_SOLO and SM_JACKET_MULTI are equal
-            large_jacket_img = utils.screenshot(*profile['LG_JACKET']).resize(profile['SM_JACKET_SOLO'][1])
-            storage['jacket_img'] = self._jacket_img
-            similar = utils.diff_ratio(self._jacket_img, large_jacket_img) <= 0.085
-            if similar:
-                self.__init__()
-            return similar, storage, True
-        elif self._samejacket < 3:
-            # Get jacket from bottom left (position based on live type)
-            if live_type == TeamSelect.SOLO:
-                dims = profile['SM_JACKET_SOLO']
-            elif live_type == TeamSelect.MULTI:
-                dims = profile['SM_JACKET_MULTI']
-            else:
+        # Song/team select menu check, only do stuff if confirmed
+        if live_type in LIVE_TYPES:
+            # Not in team select check
+            if bt != LIVE_TYPES[live_type]:
+                if self._jacket_img is not None:
+                    self._samescreen += 1
+                    if self._samescreen == 10:
+                        self.log(f'Resetting jacket image in {live_type}')
+                        self._samescreen = 0
+                        self._samejacket = 0
+                        self._jacket_img = None
+                        self._jacket_img_tmp = None
                 return False, storage, False
-            jacket_img = utils.screenshot(*dims)
-            if self._jacket_img_tmp is None:
-                self._samejacket = 0
-                self._jacket_img_tmp = jacket_img
-            else:
-                if utils.diff_ratio(self._jacket_img_tmp, jacket_img) <= 0.001:
-                    self._samejacket += 1
-                    if self._samejacket == 3:
-                        self.log(f'Obtaining jacket image in {live_type}')
-                        self._jacket_img = jacket_img
+
+            # In team select
+            self._samescreen = 0
+            if self._jacket_img is not None:
+                # Look for jacket somewhere on the center, then compare it with the "smaller" one that we got initially
+                # Assume w,h in SM_JACKET_SOLO and SM_JACKET_MULTI are equal
+                large_jacket_img = utils.screenshot(*profile['LG_JACKET']).resize(profile['SM_JACKET_SOLO'][1])
+                storage['jacket_img'] = self._jacket_img
+                similar = utils.diff_ratio(self._jacket_img, large_jacket_img) <= 0.085
+                if similar:
+                    self.__init__()
+                return similar, storage, True
+            elif self._samejacket < 3:
+                # Get jacket from bottom left (position based on live type)
+                if live_type == TeamSelect.SOLO:
+                    dims = profile['SM_JACKET_SOLO']
+                elif live_type == TeamSelect.MULTI:
+                    dims = profile['SM_JACKET_MULTI']
                 else:
+                    return False, storage, False
+                jacket_img = utils.screenshot(*dims)
+                if self._jacket_img_tmp is None:
                     self._samejacket = 0
-                self._jacket_img_tmp = jacket_img
+                    self._jacket_img_tmp = jacket_img
+                else:
+                    if utils.diff_ratio(self._jacket_img_tmp, jacket_img) <= 0.001:
+                        self._samejacket += 1
+                        if self._samejacket == 3:
+                            self.log(f'Obtaining jacket image in {live_type}')
+                            self._jacket_img = jacket_img
+                    else:
+                        self._samejacket = 0
+                    self._jacket_img_tmp = jacket_img
         return False, storage, False
