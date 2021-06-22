@@ -2,15 +2,10 @@ from PIL import ImageOps, ImageEnhance, ImageStat
 
 import utils
 from states.state import State
-from consts import LIVE_TYPES
+from consts import LIVE_TYPES, SOLO_LIVE, MULTI_LIVE
 
 
 class TeamSelect(State):
-
-    SOLO = 'solo live'
-    MULTI = 'multi live'
-    SOLO_SELECT = u'最終確認'
-    MULTI_SELECT = u'難易度選択'
 
     def __init__(self):
         super().__init__(0)
@@ -64,9 +59,9 @@ class TeamSelect(State):
             return similar, storage, True
         elif self._samejacket < 3 and live_type in LIVE_TYPES:
             # Get jacket from bottom left (position based on live type)
-            if live_type == TeamSelect.SOLO:
+            if live_type in SOLO_LIVE:
                 dims = profile['SM_JACKET_SOLO']
-            elif live_type == TeamSelect.MULTI:
+            elif live_type in MULTI_LIVE:
                 dims = profile['SM_JACKET_MULTI']
             else:
                 return False, storage, False

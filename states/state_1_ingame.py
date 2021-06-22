@@ -7,8 +7,6 @@ from states.state import State
 
 
 class InGame(State):
-    SOLO = 'solo live'
-    MULTI = 'multi live'
 
     DIFF_COLORS = [0x65dd11, 0x32bcef, 0xffa900, 0xef4366, 0xbc32ee]
     DIFF_TITLES = ['easy', 'normal', 'hard', 'expert', 'master']
