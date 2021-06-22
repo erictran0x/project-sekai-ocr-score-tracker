@@ -57,13 +57,25 @@ class TessWrapper:
     def __init__(self, lang):
         self._obj = PyTessBaseAPI(lang=lang)
         self._obj.SetPageSegMode(PSM.SINGLE_BLOCK)
+        self._cache = {}
 
     def __del__(self):
         self._obj.End()
 
     def get(self, img):
-        self._obj.SetImage(img)
-        return self._obj.GetUTF8Text().strip()
+        hs = self._hash_img(img)
+        if hs not in self._cache:
+            self._obj.SetImage(img)
+            self._cache[hs] = self._obj.GetUTF8Text().strip()
+        return self._cache[hs]
+
+    @staticmethod
+    def _hash_img(img):
+        img = img.resize((40, 40), Image.ANTIALIAS).convert("L")
+        pixel_data = list(img.getdata())
+        avg_pixel = sum(pixel_data) / len(pixel_data)
+        bits = "".join(['1' if (px >= avg_pixel) else '0' for px in pixel_data])
+        return str(hex(int(bits, 2)))[2:][::-1].upper()
 
 
 hwnd = None
