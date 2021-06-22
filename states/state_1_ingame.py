@@ -29,7 +29,7 @@ class InGame(State):
                 .point(lambda p: p > 140 and 255)
 
             # Get diff from pixel color and title from ocr
-            diff_name = self.get_best_diff(*metadata_img.getpixel(profile['DIFF_PXL']))
+            diff_name = self._get_best_diff(*metadata_img.getpixel(profile['DIFF_PXL']))
             ocr_result = utils.tess_jp.get(title_img)
 
             if len(ocr_result) == 0 or diff_name is None:
@@ -44,7 +44,7 @@ class InGame(State):
                     self.log('Now playing: {1} [{0}]'.format(storage['diff'], storage['title']))
                     from main import output_np_info
                     from global_ import gsheets
-                    pb = self.print_pb(
+                    pb = self._print_pb(
                         *gsheets.get_score(music_db.title_to_id(storage['title']),
                                            storage['diff'])) if gsheets is not None else 'N/A'
                     output_np_info('np: {1} [{0} {2}]'
@@ -63,11 +63,9 @@ class InGame(State):
             self.log('Entered result screen.')
             return True, storage, True
 
-        # If live type found, then no longer in game
-        live_type_img = utils.screenshot(*profile['LIVE_TYPE']).convert('L')
-        live_type_img = live_type_img.point(lambda p: p > 90 and 255)
-        ocr_result = utils.tess_jp.get(live_type_img).lower()
-        if ocr_result == InGame.SOLO or ocr_result == InGame.MULTI:
+        # If add crystal button found, then no longer in game
+        add_crystals_img = utils.screenshot(size=tuple(map(lambda x: x + 3, profile['PLUS_SYM'])))
+        if _color_difference(*add_crystals_img.getpixel(profile['PLUS_SYM']), 0x00CCBB) <= 1500:
             self.__init__()
             self.log('Exited from live.')
             return True, storage, False
@@ -76,7 +74,7 @@ class InGame(State):
         return False, storage, False
 
     @staticmethod
-    def print_pb(greats, goods, bads, misses):
+    def _print_pb(greats, goods, bads, misses):
         greats = int(greats) if greats.isnumeric() else 9999
         goods = int(goods) if goods.isnumeric() else 9999
         bads = int(bads) if bads.isnumeric() else 9999
@@ -91,14 +89,16 @@ class InGame(State):
                                     if greats + goods + bads + misses < 5000 else '')
 
     @staticmethod
-    def get_best_diff(r, g, b):
-        # Get color hex value from RGB values
-        color = (r << 16) | (g << 8) | b
-
+    def _get_best_diff(r, g, b):
         # Get diff title with lowest color difference that meets threshold
         best = float('inf'), None
         for i, dc in enumerate(InGame.DIFF_COLORS):
-            d = abs(dc - color)
+            d = _color_difference(r, g, b, dc)
             if d <= 750000 and d < best[0]:
                 best = d, InGame.DIFF_TITLES[i]
         return best[1]
+
+
+def _color_difference(ar, ag, ab, target):
+    act = (ar << 16) | (ag << 8) | ab
+    return abs(target - act)

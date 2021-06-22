@@ -24,6 +24,9 @@ TITLE=0,450,1280,55
 # border around jacket to determine difficulty
 DIFF_PXL=805,382
 
+# the center of the plus sign next to the crystals (aka the buy more crystals button)
+PLUS_SYM=979,48
+
 # jacket img in result screen
 JACKET_RES=98,11,70,70
 
