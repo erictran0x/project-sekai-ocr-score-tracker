@@ -62,12 +62,16 @@ class TessWrapper:
     def __del__(self):
         self._obj.End()
 
-    def get(self, img):
-        hs = self._hash_img(img)
-        if hs not in self._cache:
+    def get(self, img, cache=True):
+        if cache:
+            hs = self._hash_img(img)
+            if hs not in self._cache:
+                self._obj.SetImage(img)
+                self._cache[hs] = self._obj.GetUTF8Text().strip()
+            return self._cache[hs]
+        else:
             self._obj.SetImage(img)
-            self._cache[hs] = self._obj.GetUTF8Text().strip()
-        return self._cache[hs]
+            return self._obj.GetUTF8Text().strip()
 
     @staticmethod
     def _hash_img(img):
