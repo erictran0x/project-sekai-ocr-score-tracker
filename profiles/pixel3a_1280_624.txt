@@ -38,5 +38,5 @@ SCORE_LBL=122,106,210,49
 # auto live text in result screen, only shown if auto enabled
 AUTO_LBL=390,120,125,28
 
-# live result (perfect, great, good, bad, miss)
-LIVE_RESULT=655,373,69,149
+# live result (great, good, bad, miss)
+LIVE_RESULT=655,403,69,119

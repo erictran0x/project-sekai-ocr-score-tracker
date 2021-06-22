@@ -1,4 +1,4 @@
-from PIL import ImageOps, ImageStat, ImageEnhance
+from PIL import ImageOps, ImageStat, ImageEnhance, Image
 
 import music_db
 import utils
@@ -39,13 +39,13 @@ class LiveResult(State):
 
         # Obtain judgement data
         # TODO: a better job at making this work consistently
-        result_img = utils.screenshot(*profile['LIVE_RESULT']).convert('L')
-        res_bright = ImageStat.Stat(result_img).rms[0]
-        result_img = ImageEnhance.Brightness(result_img).enhance(100 / (res_bright if res_bright > 0 else 1))
-        result_img = ImageOps.invert(result_img).point(lambda p: p > 103 and 255)
-        ocr_result = utils.tess_en.get(result_img)
-        ocr_result = () if len(ocr_result) == 0 else list(filter(None, ocr_result.split('\n')))
-        if len(ocr_result) != 5:
+        result_img = utils.screenshot(*profile['LIVE_RESULT'])
+        srcs = tuple(map(lambda x: x.point(lambda p: p > 170 and 255), result_img.split()))
+        result_img = Image.merge('RGB', srcs).convert('L')
+        result_img = ImageOps.invert(result_img).point(lambda p: p > 10 and 255)
+        ocr_result = utils.tess_en.get(result_img, cache=False)
+        ocr_result = [] if len(ocr_result) == 0 else list(filter(None, ocr_result.split('\n')))
+        if len(ocr_result) != 4:
             return False, storage, False
         ocr_result_int = list(map(lambda s: int(s) if s.isnumeric() else -99999, ocr_result))
 
@@ -59,7 +59,7 @@ class LiveResult(State):
             self._samedata = 0
         else:
             self._samedata += 1
-            if self._samedata == 16:
+            if self._samedata == 10:
                 self.log(f'Live result: {self._result}')
                 self.update_score_to_gsheets(storage['title'], storage['diff'])
                 self.__init__()
@@ -78,11 +78,11 @@ class LiveResult(State):
             # Just add new score if possible, no need to compare since this will be the first score
             self.log(f'Adding {title} to spreadsheet...')
             score = {m_id: [['', '', '', '-1']] * 5}
-            score[m_id][DIFFICULTIES[diff]] = self._result[1:]
+            score[m_id][DIFFICULTIES[diff]] = self._result
             if gsheets.add_songs({title: m_id}, score) is None:
                 self.log(f'Unable to add {title} to spreadsheet. Live result will not be recorded.')
             else:
-                gsheets.update_score_cache(m_id, diff, list(map(str, self._result[1:])))
+                gsheets.update_score_cache(m_id, diff, list(map(str, self._result)))
                 gsheets.sort_entries()
             return
 
@@ -90,12 +90,12 @@ class LiveResult(State):
         old_res = list(map(lambda x: int(x) if x.isnumeric() else 9999, gsheets.get_score(m_id, diff)))
 
         # Compare with current result
-        if self.calc_result_score(*self._result[1:]) > self.calc_result_score(*old_res):
+        if self.calc_result_score(*self._result) > self.calc_result_score(*old_res):
             self.log(f'Higher score than previously recorded live result')
 
             # Update score data in sheet with current result
-            gsheets.edit(f'{diff}!E{row}:H{row}', [self._result[1:]])
-            gsheets.update_score_cache(m_id, diff, list(map(str, self._result[1:])))
+            gsheets.edit(f'{diff}!E{row}:H{row}', [self._result])
+            gsheets.update_score_cache(m_id, diff, list(map(str, self._result)))
         else:
             self.log(f'Lower/same score than previously recorded live result')
 
