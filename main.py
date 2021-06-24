@@ -1,3 +1,4 @@
+import win32ui
 from win32gui import FindWindow
 import sys
 import time
@@ -71,5 +72,7 @@ if __name__ == '__main__':
                         time.sleep(target - diff)
             except KeyboardInterrupt:
                 log('Detected KeyboardInterrupt. Stopping...')
+            except win32ui.error:
+                log('Detected win32ui.error (window possibly closed). Stopping...')
         else:
             log(f'Unable to find window \"{sys.argv[2]}\". Exiting...')
