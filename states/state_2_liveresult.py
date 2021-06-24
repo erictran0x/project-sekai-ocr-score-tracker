@@ -42,7 +42,7 @@ class LiveResult(State):
         result_img = utils.screenshot(*profile['LIVE_RESULT'])
         srcs = tuple(map(lambda x: x.point(lambda p: p > 170 and 255), result_img.split()))
         result_img = Image.merge('RGB', srcs).convert('L')
-        result_img = ImageOps.invert(result_img).point(lambda p: p > 10 and 255)
+        result_img = ImageOps.invert(result_img)
         ocr_result = utils.tess_en.get(result_img, cache=False)
         ocr_result = [] if len(ocr_result) == 0 else list(filter(None, ocr_result.split('\n')))
         if len(ocr_result) != 4:
