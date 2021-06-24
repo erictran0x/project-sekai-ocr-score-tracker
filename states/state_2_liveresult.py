@@ -2,7 +2,7 @@ from PIL import ImageOps, ImageStat, ImageEnhance, Image
 
 import music_db
 import utils
-from consts import DIFFICULTIES
+from consts import DIFFICULTIES, CHALLENGE_LIVE
 from states.state import State
 
 
@@ -38,8 +38,11 @@ class LiveResult(State):
             return False, storage, False
 
         # Obtain judgement data
-        # TODO: a better job at making this work consistently
-        result_img = utils.screenshot(*profile['LIVE_RESULT'])
+        if storage['live_type'] in CHALLENGE_LIVE:
+            dims = profile['LIVE_RESULT_CHALLENGE']
+        else:
+            dims = profile['LIVE_RESULT_SOLOMULTI']
+        result_img = utils.screenshot(*dims)
         srcs = tuple(map(lambda x: x.point(lambda p: p > 170 and 255), result_img.split()))
         result_img = Image.merge('RGB', srcs).convert('L')
         result_img = ImageOps.invert(result_img)
