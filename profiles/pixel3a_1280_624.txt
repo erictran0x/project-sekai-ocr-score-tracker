@@ -34,7 +34,8 @@ JACKET_RES=98,11,70,70
 # State 2 - live result
 
 # score text in result screen
-SCORE_LBL=122,106,210,49
+SCORE_LBL_SOLOMULTI=122,106,210,49
+SCORE_LBL_CHALLENGE=105,98,210,49
 
 # auto live text in result screen, only shown if auto enabled
 AUTO_LBL=390,120,125,28

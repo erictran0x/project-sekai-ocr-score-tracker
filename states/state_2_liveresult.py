@@ -19,7 +19,9 @@ class LiveResult(State):
     def update(self, storage):
         # Check if in individual result screen
         from global_ import profile
-        score_img = utils.screenshot(*profile['SCORE_LBL']).convert('L')
+        live_type = 'CHALLENGE' if storage['live_type'] in CHALLENGE_LIVE else 'SOLOMULTI'
+
+        score_img = utils.screenshot(*profile[f'SCORE_LBL_{live_type}']).convert('L')
         score_img = ImageOps.invert(score_img).point(lambda p: p > 50 and 255)
         ocr_result = utils.tess_en.get(score_img).lower()
         if ocr_result != LiveResult.SCORE:
@@ -38,11 +40,7 @@ class LiveResult(State):
             return False, storage, False
 
         # Obtain judgement data
-        if storage['live_type'] in CHALLENGE_LIVE:
-            dims = profile['LIVE_RESULT_CHALLENGE']
-        else:
-            dims = profile['LIVE_RESULT_SOLOMULTI']
-        result_img = utils.screenshot(*dims)
+        result_img = utils.screenshot(*profile[f'LIVE_RESULT_{live_type}'])
         srcs = tuple(map(lambda x: x.point(lambda p: p > 170 and 255), result_img.split()))
         result_img = Image.merge('RGB', srcs).convert('L')
         result_img = ImageOps.invert(result_img)
