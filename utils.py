@@ -1,3 +1,4 @@
+import math
 from ctypes import windll
 
 import win32ui
@@ -50,6 +51,54 @@ def diff_ratio(img_1, img_2):
     diff_img = ImageChops.difference(img_1, img_2)
     diff = ImageStat.Stat(diff_img)
     return sum(diff.mean) / (len(diff.mean) * 255)
+
+
+def closest_match(match, datadict):
+    # Perfect match? don't try to find closest one
+    if match in datadict:
+        return match
+    best_score, best_match = 0.7, match
+
+    # Convert input title to byte array
+    match = match.lower()
+    v1 = list(match.encode('utf8'))
+    for z in datadict.keys():
+        # Same title but different casing? found match
+        z_old, z = z, z.lower()
+        if match == z:
+            return z_old
+
+        # Convert expected title to byte array
+        v2 = list(z.encode('utf8'))
+
+        # Compute Jaro distance
+        l1, l2 = len(v1), len(v2)
+        max_dist = math.floor(max(l1, l2) / 2) - 1
+        hash_v1, hash_v2 = [0] * l1, [0] * l2
+        m = 0
+        for i in range(l1):
+            for j in range(max(0, i - max_dist), min(l2, i + max_dist + 1)):
+                if v1[i] == v2[j] and hash_v2[j] == 0:
+                    hash_v1[i] = 1
+                    hash_v2[j] = 1
+                    m += 1
+                    break
+        if m == 0:
+            continue
+        t = 0
+        point = 0
+        for i in range(l1):
+            if hash_v1[i] == 1:
+                while hash_v2[point] == 0:
+                    point += 1
+                if v1[i] != v2[point]:
+                    t += 1
+                point += 1
+        t /= 2
+        score = ((m / l1) + (m / l2) + ((m - t) / m)) / 3
+        if score > best_score:
+            best_score, best_match = score, z_old
+    return best_match
 
 
 class TessWrapper:
