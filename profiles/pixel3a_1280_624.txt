@@ -4,7 +4,7 @@
 # State 0 - team select
 
 # live type text (solo live/multi live)
-LIVE_TYPE=113,13,230,36
+LIVE_TYPE=113,13,315,36
 
 # the text below the live type text
 LIVE_BT=133,53,230,22
