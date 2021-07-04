@@ -33,7 +33,10 @@ class TeamSelect(State):
         bt_img = ImageEnhance.Brightness(bt_img).enhance(100 / (bt_rms if bt_rms > 0 else 1))
         bt_img = ImageOps.invert(bt_img).point(lambda p: p > 150 and 255)
 
-        live_type, bt = utils.tess_en.get(live_type_img).lower(), utils.tess_jp.get(bt_img)
+        live_type = utils.tess_en.get(live_type_img).lower()
+        live_type_2 = utils.closest_match(live_type, LIVE_TYPES)
+        bt = utils.tess_jp.get(bt_img)
+        print(live_type, live_type_2)
 
         # Song select menu check
         if live_type in LIVE_TYPES and bt != LIVE_TYPES[live_type]:
